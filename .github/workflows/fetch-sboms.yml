@@ -23,17 +23,21 @@ jobs:
             
             for repo_full_name in $repos; do
               # Sanitize name for folder (replace '/' with '-')
-                folder_name=$(echo "$repo_full_name" | tr '/' '-')
-                echo "Processing $repo_full_name..."
-                mkdir -p "./all-sboms/$folder_name"
+              folder_name=$(echo "$repo_full_name" | tr '/' '-')
+              echo "Processing $repo_full_name..."
+              mkdir -p "./all-sboms/$folder_name"
 
-                gh api "/repos/$repo_full_name/releases/latest" \
-                  --jq ".assets[] | select(.name | test(\"$REGEX\")) | [.id, .name] | @tsv" \
-                | while IFS=$'\t' read -r asset_id asset_name; do
-                    echo "Downloading $asset_name -> ./all-sboms/$folder_name/$asset_name"
-                    gh api -H "Accept: application/octet-stream" \
-                      "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name"
-                  done
+              # Try to get latest release; skip if not found
+              if ! gh api "/repos/$repo_full_name/releases/latest" \
+                --jq ".assets[] | select(.name | test(\"$REGEX\")) | [.id, .name] | @tsv" \
+                2>/dev/null | while IFS=$'\t' read -r asset_id asset_name; do
+                  echo "Downloading $asset_name -> ./all-sboms/$folder_name/$asset_name"
+                  gh api -H "Accept: application/octet-stream" \
+                    "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name"
+            		  
+                done; then
+                echo "No release or no matching assets for $repo_full_name, skipping."
+               fi
             done
       - name: Zip and Upload Artifacts
         uses: actions/upload-artifact@v4
