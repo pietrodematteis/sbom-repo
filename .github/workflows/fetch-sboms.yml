@@ -19,7 +19,7 @@ jobs:
         run: |
           # 1. Get the top 100 most starred repos on GitHub
             repos=$(gh search repos "SBOM" --limit 100 --sort stars --order desc --json fullName --jq '.[].fullName')
-            REGEX='(?i)(^|[-_.])(?:sbom|cyclonedx|spdx|bom).*?\.(json|xml|cdx|spdx|bom)?$'
+            REGEX='(?i)(^|[-_.])(?:sbom|cyclonedx|spdx|bom).*?\\.(json|xml|cdx|spdx|bom)?$'
             
             for repo_full_name in $repos; do
               # Sanitize name for folder (replace '/' with '-')
