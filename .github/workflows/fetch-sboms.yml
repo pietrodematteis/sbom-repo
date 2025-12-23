@@ -23,19 +23,17 @@ jobs:
             
             for repo_full_name in $repos; do
               # Sanitize name for folder (replace '/' with '-')
-              folder_name=$(echo $repo_full_name | tr '/' '-')
-              echo "Processing $repo_full_name..."
-              mkdir -p "./all-sboms/$folder_name"
+                folder_name=$(echo "$repo_full_name" | tr '/' '-')
+                echo "Processing $repo_full_name..."
+                mkdir -p "./all-sboms/$folder_name"
 
-              # 2. Try to filter for SBOM in branch
-              gh api "/repos/$repo_full_name/releases/latest" \
-                --jq '.assets[] | select(.name | test("'"$REGEX"")) | [.id, .name] | @tsv' \
-              | while IFS=$'\t' read -r asset_id asset_name; do
-                  echo "Downloading $asset_name -> ./all-sboms/$folder_name/$asset_name"
-                  gh api -H "Accept: application/octet-stream" \
-                    "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name"
-                done
-            done
+                gh api "/repos/$repo_full_name/releases/latest" \
+                  --jq ".assets[] | select(.name | test(\"$REGEX\")) | [.id, .name] | @tsv" \
+                | while IFS=$'\t' read -r asset_id asset_name; do
+                    echo "Downloading $asset_name -> ./all-sboms/$folder_name/$asset_name"
+                    gh api -H "Accept: application/octet-stream" \
+                      "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name        "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name"
+                  done
             
       - name: Zip and Upload Artifacts
         uses: actions/upload-artifact@v4
