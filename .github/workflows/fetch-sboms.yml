@@ -27,7 +27,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # 1. Get the top 100 most starred repos on GitHub
-            repos=$(gh search repos "$input_filter" --limit $input_limit --sort stars --order desc --json fullName --jq '.[].fullName')
+            repos=$(gh search repos "$input_filter" --limit "$input_limit" --sort stars --order desc --json fullName --jq '.[].fullName')
             REGEX='(?i)(^|[-_.])(?:sbom|cyclonedx|spdx|bom).*?\\.(json|xml|cdx|spdx|bom)?$'
             
             for repo_full_name in $repos; do
