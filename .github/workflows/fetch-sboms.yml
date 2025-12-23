@@ -31,9 +31,9 @@ jobs:
               gh api "/repos/$repo_full_name/releases/latest" \
                 --jq '.assets[] | select(.name | test("'"$REGEX"")) | [.id, .name] | @tsv' \
               | while IFS=$'\t' read -r asset_id asset_name; do
-                  echo "Downloading $asset_name -> ./all-sboms/$folder_name"
+                  echo "Downloading $asset_name -> ./all-sboms/$folder_name/$asset_name"
                   gh api -H "Accept: application/octet-stream" \
-                    "/repos/$OWNER/$REPO/releases/assets/$asset_id      "/repos/$OWNER/$REPO/releases/assets/$asset_id" > "./all-sboms/$folder_name"
+                    "/repos/$repo_full_name/releases/assets/$asset_id      "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name"
             done
             
       - name: Zip and Upload Artifacts
