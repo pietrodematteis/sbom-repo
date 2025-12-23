@@ -34,7 +34,7 @@ jobs:
                     gh api -H "Accept: application/octet-stream" \
                       "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name        "/repos/$repo_full_name/releases/assets/$asset_id" > "./all-sboms/$folder_name/$asset_name"
                   done
-            
+            done
       - name: Zip and Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
