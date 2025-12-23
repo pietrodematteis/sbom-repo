@@ -19,24 +19,21 @@ jobs:
         run: |
           # 1. Get the top 100 most starred repos on GitHub
             repos=$(gh search repos "SBOM" --limit 100 --sort stars --order desc --json fullName --jq '.[].fullName')
+            REGEX='(?i)(^|[-_.])(?:sbom|cyclonedx|spdx|bom).*?\.(json|xml|cdx|spdx|bom)?$'
             
             for repo_full_name in $repos; do
               # Sanitize name for folder (replace '/' with '-')
               folder_name=$(echo $repo_full_name | tr '/' '-')
               echo "Processing $repo_full_name..."
               mkdir -p "./all-sboms/$folder_name"
-              ls -la
-                          
-              # 2. Try to find SBOM in branch
-              # Note: We use the full name here because they aren't in your org
-              gh api repos/$repo_full_name/contents/bom.json > /dev/null 2>&1
-              if [ $? -eq 0 ]; then
-                gh repo view $repo_full_name --path bom.json > "./all-sboms/$folder_name/branch-bom.json"
-              fi
-            
-              # 3. Try to find SBOM in latest Release Assets
-              latest_release_assets=$(gh release view --repo $repo_full_name --json assets --jq '.assets[].name' 2>/dev/null || true)
-              # ... (rest of the download logic remains the same)
+
+              # 2. Try to filter for SBOM in branch
+              gh api "/repos/$repo_full_name/releases/latest" \
+                --jq '.assets[] | select(.name | test("'"$REGEX"")) | [.id, .name] | @tsv' \
+              | while IFS=$'\t' read -r asset_id asset_name; do
+                  echo "Downloading $asset_name -> ./all-sboms/$folder_name"
+                  gh api -H "Accept: application/octet-stream" \
+                    "/repos/$OWNER/$REPO/releases/assets/$asset_id      "/repos/$OWNER/$REPO/releases/assets/$asset_id" > "./all-sboms/$folder_name"
             done
             
       - name: Zip and Upload Artifacts
