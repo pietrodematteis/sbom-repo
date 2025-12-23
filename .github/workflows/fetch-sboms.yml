@@ -6,6 +6,11 @@ on:
         description: 'Filter'
         required: true
         default: 'SBOM'
+      max_repos:
+        type: number 
+        description: "Maximum number of repositories to process"
+        required: true
+        default: 100
         
 jobs:
   gather-sboms:
@@ -23,7 +28,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # 1. Get the top 100 most starred repos on GitHub
-            repos=$(gh search repos ${{inputs.input_filter}} --limit 100 --sort stars --order desc --json fullName --jq '.[].fullName')
+            repos=$(gh search repos ${{inputs.input_filter}} --limit ${{inputs.max_repos}} --sort stars --order desc --json fullName --jq '.[].fullName')
             REGEX='(?i)(^|[-_.])(?:sbom|cyclonedx|spdx|bom).*?\\.(json|xml|cdx|spdx|bom)?$'
             
             for repo_full_name in $repos; do
