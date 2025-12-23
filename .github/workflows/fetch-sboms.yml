@@ -14,9 +14,6 @@ jobs:
 
       - name: Fetch SBOMs
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.MY_PAT_TOKEN }} # Needs 'repo' scope
-          ORG_NAME: "your-org-name"
         run: |
           # 1. Get the top 100 most starred repos on GitHub
             repos=$(gh search repos "" --limit 100 --sort stars --order desc --json fullName --jq '.[].fullName')
