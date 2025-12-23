@@ -18,7 +18,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # 1. Get the top 100 most starred repos on GitHub
-            repos=$(gh search repos "" --limit 100 --sort stars --order desc --json fullName --jq '.[].fullName')
+            repos=$(gh search repos "SBOM" --limit 100 --sort stars --order desc --json fullName --jq '.[].fullName')
             
             for repo_full_name in $repos; do
               # Sanitize name for folder (replace '/' with '-')
